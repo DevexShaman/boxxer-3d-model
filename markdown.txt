@@ -1,0 +1,248 @@
+Full project spec for **Boxxerworld 3D Product Customizer**
+
+ understand the complete requirements, tech stack, folder structure, goals, inputs/outputs, validations, and do’s/don’ts for the 3D product customization project. It assumes the `.glb` (GLB) model file will be provided by the senior and you do **not** need Blender installed.
+
+---
+
+## Prompt (paste this to the AI / share with the developer)
+
+You are an experienced full-stack developer/architect assigned to build the **Boxxerworld 3D Product Customizer**. Read carefully and produce a step-by-step implementation plan, the code skeletons, and dev tasks. The finished system must allow end users to **rotate, zoom, customize (colors, textures, decals, text), preview, export image, and submit orders** for a product whose GLB file will be provided. The client will supply the GLB directly — you do **not** need Blender or to edit models. However, the GLB must meet the expectations listed below; if any expectation isn’t met, describe how to detect it and what to ask the model provider to fix.
+
+### 1 — High level goal
+
+* Build a web-based product customizer that renders a single product (GLB) in 3D, allows real-time customization, captures a high-quality preview image, and produces an order payload (JSON + image + uploaded assets) that can be used by backend/order systems.
+* MVP: one product, 3–4 customizable parts (e.g., `Upper`, `Sole`, `Laces`, `LogoArea`), color/texture swap, logo upload (decal), and image export + Add-to-Cart API.
+
+### 2 — Tech stack (explicit)
+
+* Frontend / app: **React.js (React) with TypeScript** (or plain React + Vite if simpler).
+* 3D rendering: **three.js** via **@react-three/fiber** (React Three Fiber) and **@react-three/drei** helpers.
+* State: **Redux Toolkit** (serializable state).
+* GLTF loader: Three's GLTFLoader (via `useGLTF` from `@react-three/drei`).
+* Model format: **.glb** (glTF binary).
+* Image export: `canvas.toDataURL()` / convert to Blob for upload.
+* Backend API: any REST endpoint (example: `POST /api/orders`) — send JSON + image URL or base64; file uploads to S3 or backend.
+* Optional: **draco** compression for GLB assets in production, CDN for model hosting.
+* Dev tooling: Node LTS, Git, VS Code.
+
+### 3 — Project folder structure (exact recommended layout)
+
+```
+/src
+  /pages or /app
+    /customize/[productId].tsx        # page wrapper
+  /components
+    /ui
+      ColorPicker.tsx
+      TexturePicker.tsx
+      LogoUploader.tsx
+      ControlsPanel.tsx
+      ActionButtons.tsx
+    /three
+      Scene.tsx
+      ProductModel.tsx
+      CameraControls.tsx
+      Lights.tsx
+  /store
+    index.ts
+    productSlice.ts
+    uiSlice.ts
+  /services
+    modelLoader.ts
+    imageExport.ts
+    uploadService.ts
+  /hooks
+    useMaterialUpdater.ts
+    useDecalManager.ts
+  /utils
+    constants.ts
+    priceCalculator.ts
+    serialization.ts
+  /public
+    /models
+      product.glb                     # supplied by senior
+    /textures
+```
+
+### 4 — Responsibilities of each folder/file (purpose)
+
+* `pages/customize/[productId].tsx` — main page: loads modelId, provides layout and panels, coordinates store.
+* `components/ui/*` — pure UI controls only (color pickers, texture list, file input). They dispatch Redux actions only.
+* `components/three/Scene.tsx` — `<Canvas>` and scene composition (lighting, camera, controls, suspense).
+* `components/three/ProductModel.tsx` — loads GLB once (useGLTF), traverses scene and updates per-part materials based on Redux. Contains decal application logic.
+* `store/productSlice.ts` — contains the customization state (parts, decals, text, model url, version) and actions to modify it.
+* `services/modelLoader.ts` — small wrapper around useGLTF / GLTFLoader; centralized place for caching/handling load errors.
+* `services/imageExport.ts` — capture high-res PNG from canvas, convert to blob, return file object or upload.
+* `services/uploadService.ts` — upload preview + assets to server or S3; returns accessible URLs.
+* `hooks/*` — reusable logic for material updates and decal placement; these read from Redux and mutate Three materials but remain separate to keep `ProductModel` clean.
+* `utils/*` — serializing customization to JSON, price calculation, constants.
+
+### 5 — Exact requirements & acceptance criteria (what must work)
+
+* Load GLB from `/public/models/product.glb` (or a CDN URL) on the customize page.
+* User can rotate & zoom interactively (OrbitControls) with sensible limits.
+* UI controls must update product visuals in real-time:
+
+  * Color changes update `MeshStandardMaterial.color` on target mesh.
+  * Texture selection sets material.map and supports repeat/offset if needed.
+  * Uploaded logos apply as decals/textures to the specified `LogoArea` mesh (don't re-export GLB).
+* Decals must respect the mesh UVs (so logos map correctly). For MVP we can replace `LogoArea`'s material map with uploaded logo texture if model is designed for it.
+* Image export: produce PNG at desired resolution (desktop preview, and a higher-res render for order storage).
+* Save configuration: create a JSON payload with `productId`, `modelVersion`, `parts` (colors/textures), `decals` (URLs + metadata), and `previewImageUrl` (after upload).
+* The Add-to-Cart endpoint receives the payload and returns success. Example payload in acceptance test (below).
+* The UI should show loading states when model/textures are loaded/uploaded and disable controls appropriately.
+* All state must be serializable (no circular references in Redux).
+
+### 6 — Example Redux state & order payload (copy/pasteable)
+
+**Redux state shape (JSON):**
+
+```json
+{
+  "productId": "shoe-001",
+  "modelUrl": "/models/product.glb",
+  "modelVersion": "v1",
+  "parts": {
+    "Upper": { "color": "#ffffff", "texture": null },
+    "Sole": { "color": "#000000", "texture": "leather_01" },
+    "Laces": { "color": "#ff0000", "texture": null },
+    "LogoArea": { "color": "#ffffff", "texture": null }
+  },
+  "decals": [
+    {
+      "id": "dec-1",
+      "imageUrl": "https://cdn.example.com/uploads/logo-123.png",
+      "targetMesh": "LogoArea",
+      "position": [0, 0.2, 0],
+      "scale": 0.3,
+      "rotation": 0
+    }
+  ],
+  "text": { "value": "BOXXER", "color": "#000000", "targetMesh": "Upper" }
+}
+```
+
+**Order payload to backend:**
+
+```json
+{
+  "productId": "shoe-001",
+  "modelVersion": "v1",
+  "customization": { /* same as parts + decals + text above */ },
+  "previewImageUrl": "https://cdn.example.com/previews/user-123-preview.png",
+  "assets": [
+    "https://cdn.example.com/uploads/logo-123.png"
+  ],
+  "price": 129.99
+}
+```
+
+### 7 — GLB expectations — what the senior must provide (must be enforced)
+
+Because you won’t use Blender, require the GLB to satisfy these items. If any are missing, request the senior to supply a corrected GLB.
+
+* Each customizable region is a **separate mesh** with clear names (case-sensitive). Example: `Upper`, `Sole`, `Laces`, `LogoArea`.
+* Mesh names must be unique and stable (no random suffixes like `.001`).
+* Each customizable mesh has a single PBR material (MeshStandardMaterial compatible) — no combined baked maps.
+* `LogoArea` must be UV-unwrapped so applying a texture to that mesh maps correctly.
+* No baked lighting into textures (no shadow/AO baked unless separate AO map channels are provided).
+* Correct orientation (Y-up is fine), transforms applied, and reasonable scale (meters).
+* If possible, include a `thumbnail` camera or a front-facing pose (this is optional but helpful).
+* Provide `modelVersion` metadata or filename convention `product_v1.glb`.
+
+### 8 — Do’s and Don’ts (best practices)
+
+#### DO:
+
+* Keep **UI logic** separate from **3D logic**. UI dispatches Redux actions only.
+* Keep **one material per part** and modify material properties at runtime (don’t reload the GLB).
+* Use `useGLTF` (drei) so GLB is cached and not re-fetched.
+* Store only serializable data in Redux (colors as strings, texture URLs as strings).
+* Use CDN and caching for GLB/texture hosting in production.
+* Provide clear loading and error UI for model/texture loads.
+* For logo uploads: upload to server/S3 and use returned URL for decal application (avoid `createObjectURL` in production).
+* Test on low-end devices and add LOD or reduced-poly models if needed.
+
+#### DON’T:
+
+* Don’t merge all parts into one mesh or bake multiple parts into a single texture if per-part customization is required.
+* Don’t store Three.js objects (Mesh/Material) in Redux.
+* Don’t assume arbitrary GLB files conform — always validate mesh names and UVs at load time.
+* Don’t use client-only `createObjectURL` for production assets without persisting them on server/CDN.
+
+### 9 — Edge cases & error handling to implement
+
+* GLB load error: show fallback image + retry.
+* Mesh not found: display clear developer console warning and fall back to applying color to entire model.
+* Uploaded decal exceeds size limits: validate on client (max 5MB) and compress client-side if needed.
+* CORS/tainted canvas when using externally hosted textures: ensure uploaded images are served with proper CORS headers or send assets via backend.
+* Cross-device performance: automatically reduce render resolution or disable shadows on low-perf devices.
+
+### 10 — Testing & acceptance tests (manual + automated)
+
+* Manual test checklist:
+
+  1. Load page → model appears within 5 seconds on broadband.
+  2. Rotate & zoom work; camera resets to preset views.
+  3. Change Upper color → material updates instantly.
+  4. Apply texture to Sole → texture updates and repeats as expected.
+  5. Upload logo → logo appears correctly on `LogoArea`.
+  6. Export image → file is downloadable and looks identical to screen render.
+  7. Add-to-cart → order POST contains correct JSON and uploaded asset URLs.
+* Automated:
+
+  * Unit tests for reducers and serializable state.
+  * E2E tests to simulate color pick, logo upload, export, and API call.
+
+### 11 — Performance & deployment checklist
+
+* Use Draco-compressed GLB in production and host on CDN.
+* Lazy-load GLB only on the customize route; show low-res placeholder elsewhere.
+* Use `requestAnimationFrame` wisely; pause rendering when tab not visible (react-three-fiber handles this via frameloop).
+* Use compressed textures and cache headers.
+* For high-res image export, render to an offscreen canvas at desired resolution, then convert to blob for upload.
+
+### 12 — Security & privacy
+
+* Validate and scan uploaded logos for malware.
+* Set appropriate CORS and signed upload policies for S3.
+* Ensure uploaded images are not executable (serve as images only).
+
+### 13 — Implementation
+
+1. Bootstrapped React JS app + Redux + R3F skeleton, loads GLB and allows rotate/zoom. 
+2. Color picker + part mapping for 3 parts. 
+3. Texture swap and logo upload (local preview using URL.createObjectURL) for prototyping. 
+4. Image export + add-to-cart payload + backend POST stub. 
+5. Replace local preview uploads with secure backend/S3 upload + final preview URL used in payload. 
+6. Performance optimization & QA. 
+
+### 14 — Acceptance note about Blender and GLB
+
+* **Important:** I will receive the `.glb` files from my senior. I will **not** install Blender. The GLB file must conform to the GLB expectations listed above. If it does not, the developer must list the exact problems and the adjustments required from the model provider.
+
+### 15 — Deliver to me (the requester)
+
+* A step-by-step checklist of what you (the developer/AI) will do next.
+* A minimal runnable prototype repository or zip with:
+
+  * `pages/customize/[productId].tsx`
+  * `components/three/{Scene,ProductModel,CameraControls}.tsx`
+  * `components/ui/{ColorPicker,LogoUploader}.tsx`
+  * `store/productSlice.ts` and `store/index.ts`
+  * `services/imageExport.ts` and `services/uploadService.ts` (stubbed)
+  * sample `public/models/product.glb` placeholder (if real GLB not available)
+* A short guide listing exactly what to ask the senior if the GLB is nonconforming.
+
+---
+
+## Final note — style & communication for the AI
+
+* Use TypeScript in examples.
+* Provide copy-pasteable code blocks for the skeleton files.
+* Provide helpful console warnings where GLB structure assumptions are violated.
+* Keep UI simple and functional (focus on correctness, not fancy visuals).
+
+---
+
+If any piece of the GLB is missing or doesn't match naming/UV expectations, produce a short checklist sentence that I can send to my senior describing the exact fix needed (mesh names, UV, material type).

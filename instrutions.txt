@@ -1,0 +1,177 @@
+You are a senior 3D web engineer with deep expertise in Three.js, React Three Fiber, GLTF workflows, and PBR materials.
+
+I am building a 3D product customization system using:
+
+React
+
+React Three Fiber
+
+@react-three/drei
+
+Three.js
+
+GLB (glTF) models
+
+Redux for state
+
+PBR material workflow
+
+Current Situation
+
+I already have a .glb model with separate meshes per part.
+
+Color customization on meshes works correctly.
+
+I now want to apply fabric images so that:
+
+The texture pattern
+
+The fabric color
+
+And the cloth surface look
+
+appear as close as possible to the reference image selected by the user.
+
+The images show real cloth/fabric (woven patterns, fibers, shading), and when selected, the same fabric should appear on the target mesh — not just as a flat sticker or decal, but as a realistic material.
+
+Problem
+
+Despite loading the texture images and assigning them to map, normalMap, and roughnessMap, the fabric on the 3D model:
+
+Does NOT visually match the reference image
+
+Looks flat, washed out, incorrect in color, or unrealistic
+
+Does not preserve the original fabric tone or depth
+
+Existing Code Context
+
+Textures are applied using useTexture
+
+MeshStandardMaterial is used
+
+map, normalMap, and roughnessMap are assigned
+
+color is reset to white
+
+metalness = 0, roughness = 1
+
+flipY = false
+
+SRGBColorSpace is set
+
+Texture repeat, rotation, and anisotropy are applied
+
+Yet the final appearance is still wrong.
+
+What I want from you
+
+Analyze this setup and explain WHY the fabric image does not visually match the reference, and explain HOW TO FIX IT PROPERLY, covering:
+
+1️⃣ Conceptual Mistakes
+
+Why a single fabric image cannot automatically become a realistic cloth material
+
+Difference between:
+
+Image texture
+
+Albedo/BaseColor
+
+Normal map
+
+Roughness map
+
+Fabric weave depth
+
+Why decals and textures are not the same thing
+
+2️⃣ PBR Workflow Issues
+
+What is missing when only an image is used
+
+Why correct fabric appearance requires multiple texture maps
+
+How lighting, roughness, and normals affect perceived color
+
+Why lighting makes the fabric look “wrong” even if the image is correct
+
+3️⃣ GLTF + Three.js Specific Issues
+
+Color space mismatches
+
+Tone mapping and exposure issues
+
+Gamma correction pitfalls
+
+Why setting roughness to 1 can destroy fabric realism
+
+When normalScale can ruin cloth look
+
+4️⃣ Correct Fabric Texture Pipeline
+
+Explain the correct production-grade approach:
+
+How fabric images should be converted into:
+
+BaseColor
+
+Normal
+
+Roughness
+
+(Optional) Ambient Occlusion
+
+When to preprocess textures outside the app
+
+Why AI texture generation or Substance-style workflows are needed
+
+5️⃣ What SHOULD be done instead
+
+Explain the correct solution, such as:
+
+Pre-creating real fabric PBR texture sets
+
+Mapping fabric IDs → PBR texture packs
+
+Avoiding runtime “magic fabric generation”
+
+Treating fabric selection as material swapping, not image mapping
+
+6️⃣ Dos and Don’ts
+
+Clearly list:
+
+❌ What should NOT be attempted
+
+✅ What is the correct industry practice
+
+⚠️ Performance and memory pitfalls
+
+⚠️ What beginners usually get wrong
+
+Important Constraints
+
+I will NOT modify the GLB in Blender
+
+I receive the GLB from a senior and must use it as-is
+
+Fabric images come from UI selection
+
+The goal is realistic cloth appearance, not decals
+
+This is for a production e-commerce product customizer
+
+Final Goal
+
+Help me fully understand:
+
+Why my current approach cannot work as expected
+
+What the correct mental model is
+
+How to architect fabric customization correctly
+
+How to fix the issue without hacks or visual cheats
+
+Explain clearly, step by step, in a beginner-friendly but production-grade way.
