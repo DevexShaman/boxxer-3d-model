@@ -6,7 +6,9 @@ import Lights from './Lights';
 import CameraControls from './CameraControls';
 import ProductModel from './ProductModel';
 
-const Scene = () => {
+import { Fabric } from '../../utils/parseFabrics';
+
+const Scene = ({ allFabrics }: { allFabrics: Fabric[] }) => {
     return (
         <Canvas
             shadows
@@ -15,24 +17,32 @@ const Scene = () => {
                 preserveDrawingBuffer: true,
                 antialias: true,
                 toneMapping: THREE.ACESFilmicToneMapping,
-                toneMappingExposure: 1.2,
+                toneMappingExposure: 1.0, // Calibrated for studio lighting
                 outputColorSpace: THREE.SRGBColorSpace
             }}
             className="bg-gradient-to-br from-slate-100 to-slate-200"
         >
             <Suspense fallback={null}>
                 <Lights />
-                <Environment preset="studio" />
+
+                {/* 
+                  Studio Environment Lighting (Normalized)
+                  Using a further reduced intensity to prevent specular glare at grazing angles.
+                */}
+                <Environment
+                    preset="studio"
+                    environmentIntensity={0.4}
+                />
 
                 <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-                    <ProductModel />
+                    <ProductModel allFabrics={allFabrics} />
                 </Float>
 
                 <ContactShadows
                     position={[0, -0.8, 0]}
-                    opacity={0.25}
+                    opacity={0.15}
                     scale={10}
-                    blur={2.5}
+                    blur={3}
                     far={1}
                 />
 

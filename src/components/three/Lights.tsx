@@ -1,16 +1,39 @@
 const Lights = () => {
     return (
         <>
-            <ambientLight intensity={0.5} />
-            <spotLight
-                position={[5, 10, 5]}
-                angle={0.15}
-                penumbra={1}
-                intensity={2}
+            {/* Front Soft Fill: Provides base illumination from camera side */}
+            <directionalLight
+                position={[0, 2, 8]}
+                intensity={0.6}
                 castShadow
+                shadow-mapSize={[1024, 1024]}
             />
-            <directionalLight position={[-5, 5, 5]} intensity={1} />
-            <pointLight position={[0, -5, 5]} intensity={0.5} />
+
+            {/* Back Rim: Subtle edge definition */}
+            <directionalLight
+                position={[0, 4, -8]}
+                intensity={0.3}
+            />
+
+            {/* Left Balance: Soft fill from the side */}
+            <directionalLight
+                position={[-8, 2, 2]}
+                intensity={0.4}
+            />
+
+            {/* Right Balance: Soft fill from the other side */}
+            <directionalLight
+                position={[8, 2, 2]}
+                intensity={0.4}
+            />
+
+            {/* Top Soft Ambient: Vertical volume */}
+            <directionalLight
+                position={[0, 8, 0]}
+                intensity={0.2}
+            />
+
+            <ambientLight intensity={0.15} />
         </>
     );
 };

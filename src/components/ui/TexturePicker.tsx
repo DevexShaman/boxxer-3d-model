@@ -15,6 +15,7 @@ const TexturePicker = ({ partName, label }: TexturePickerProps) => {
 
     const textures = [
         { id: null, label: 'Standard', color: 'bg-slate-200' },
+        { id: 'crepe_satin', label: 'Crepe Satin', color: 'bg-rose-200' },
         { id: 'leather_01', label: 'Leather', color: 'bg-orange-800' },
         { id: 'carbon_01', label: 'Carbon', color: 'bg-slate-800' },
         { id: 'fabric_01', label: 'Fabric', color: 'bg-blue-800' },

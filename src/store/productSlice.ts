@@ -11,11 +11,15 @@ interface Decal {
 
 interface PartCustomization {
     color: string;
-    texture: string | null;
-    textureScale: number;
-    textureRotation: number;
-    textureOffset: [number, number];
-    normalScale: number;
+    fabricId: string | null;
+    maps: {
+        map?: string;
+        normalMap?: string;
+        roughnessMap?: string;
+        metalnessMap?: string;
+        displacementMap?: string;
+        aoMap?: string;
+    } | null;
 }
 
 interface ProductState {
@@ -29,6 +33,7 @@ interface ProductState {
         color: string;
         targetMesh: string;
     };
+    selectedPart: string;
 }
 
 const initialState: ProductState = {
@@ -36,13 +41,13 @@ const initialState: ProductState = {
     modelUrl: '/models/Boxing-shorts-copy.glb',
     modelVersion: 'v1',
     parts: {
-        BX_8_BRIT_CURVED_1_1: { color: '#ffffff', texture: null, textureScale: 1, textureRotation: 0, textureOffset: [0, 0], normalScale: 1 },
-        BX_8_BRIT_CURVED_1_2: { color: '#ffffff', texture: null, textureScale: 1, textureRotation: 0, textureOffset: [0, 0], normalScale: 1 },
-        BX_8_BRIT_CURVED_1_3: { color: '#ffffff', texture: null, textureScale: 1, textureRotation: 0, textureOffset: [0, 0], normalScale: 1 },
-        BX_8_BRIT_CURVED_1_4: { color: '#ffffff', texture: null, textureScale: 1, textureRotation: 0, textureOffset: [0, 0], normalScale: 1 },
-        BX_8_BRIT_CURVED_1_5: { color: '#ffffff', texture: null, textureScale: 1, textureRotation: 0, textureOffset: [0, 0], normalScale: 1 },
-        BX_8_BRIT_CURVED_1_6: { color: '#ffffff', texture: null, textureScale: 1, textureRotation: 0, textureOffset: [0, 0], normalScale: 1 },
-        BX_8_BRIT_CURVED_1_7: { color: '#ffffff', texture: null, textureScale: 1, textureRotation: 0, textureOffset: [0, 0], normalScale: 1 },
+        BX_8_BRIT_CURVED_1_1: { color: '#ffffff', fabricId: null, maps: null },
+        BX_8_BRIT_CURVED_1_2: { color: '#ffffff', fabricId: null, maps: null },
+        BX_8_BRIT_CURVED_1_3: { color: '#ffffff', fabricId: null, maps: null },
+        BX_8_BRIT_CURVED_1_4: { color: '#ffffff', fabricId: null, maps: null },
+        BX_8_BRIT_CURVED_1_5: { color: '#ffffff', fabricId: null, maps: null },
+        BX_8_BRIT_CURVED_1_6: { color: '#ffffff', fabricId: null, maps: null },
+        BX_8_BRIT_CURVED_1_7: { color: '#ffffff', fabricId: null, maps: null },
     },
     decals: [],
     text: {
@@ -50,31 +55,31 @@ const initialState: ProductState = {
         color: '#000000',
         targetMesh: 'BX_8_BRIT_CURVED_1_1',
     },
+    selectedPart: 'BX_8_BRIT_CURVED_1_1',
 };
 
 export const productSlice = createSlice({
     name: 'product',
     initialState,
     reducers: {
+        selectPart: (state, action: PayloadAction<string>) => {
+            state.selectedPart = action.payload;
+        },
         setPartColor: (state, action: PayloadAction<{ partName: string; color: string }>) => {
             const { partName, color } = action.payload;
             if (state.parts[partName]) {
                 state.parts[partName].color = color;
             }
         },
-        setPartTexture: (state, action: PayloadAction<{
+        setPartFabric: (state, action: PayloadAction<{
             partName: string;
-            texture: string | null;
-            textureScale?: number;
-            textureRotation?: number;
-            normalScale?: number;
+            fabricId: string | null;
+            maps: PartCustomization['maps'];
         }>) => {
-            const { partName, texture, textureScale, textureRotation, normalScale } = action.payload;
+            const { partName, fabricId, maps } = action.payload;
             if (state.parts[partName]) {
-                state.parts[partName].texture = texture;
-                if (textureScale !== undefined) state.parts[partName].textureScale = textureScale;
-                if (textureRotation !== undefined) state.parts[partName].textureRotation = textureRotation;
-                if (normalScale !== undefined) state.parts[partName].normalScale = normalScale;
+                state.parts[partName].fabricId = fabricId;
+                state.parts[partName].maps = maps;
             }
         },
         addDecal: (state, action: PayloadAction<Decal>) => {
@@ -89,5 +94,12 @@ export const productSlice = createSlice({
     },
 });
 
-export const { setPartColor, setPartTexture, addDecal, removeDecal, updateText } = productSlice.actions;
+export const {
+    selectPart,
+    setPartColor,
+    setPartFabric,
+    addDecal,
+    removeDecal,
+    updateText
+} = productSlice.actions;
 export default productSlice.reducer;

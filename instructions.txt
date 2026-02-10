@@ -1,0 +1,216 @@
+You are a senior Three.js / WebGL lighting and PBR rendering expert specializing in product configurators and fabric rendering.
+
+Current Issue
+
+The 3D model looks correct from some angles, but from other angles:
+
+Parts of the model turn whitish / overexposed
+
+Highlights blow out when rotating the model
+
+Lighting is directional instead of uniform
+
+Fabric detail disappears at certain angles
+
+This happens during full 360° rotation of the model.
+
+🎯 Final Goal
+
+Create a uniform, physically correct studio lighting setup that:
+
+Looks consistent from all 360° angles
+
+Prevents overexposure at grazing angles
+
+Preserves fabric texture, roughness, and weave
+
+Uses soft, realistic shadows
+
+Feels like a professional e-commerce product viewer
+
+No angle should look brighter than the others.
+
+🔍 What You Must Fix & Implement
+1️⃣ Replace Directional-Dominant Lighting with Balanced Studio Lighting
+
+You must avoid relying on a single key light.
+
+Instead:
+
+Use multiple low-intensity area-style lights
+
+Balance light contribution from all sides
+
+No light should exceed realistic intensity values
+
+Target:
+
+Even illumination
+
+Controlled highlights
+
+No hotspot glare
+
+2️⃣ Environment Lighting Normalization (Critical)
+
+The HDRI environment must:
+
+Be neutral studio HDR
+
+Have low contrast
+
+Use moderate intensity
+
+Never dominate the lighting alone
+
+You must:
+
+Normalize environment contribution
+
+Prevent reflection spikes from HDR hotspots
+
+3️⃣ Light Rig for 360° Stability
+
+Create a 4-point soft studio rig:
+
+Front soft fill
+
+Back rim (very subtle)
+
+Left & right soft balance lights
+
+Optional overhead ambient soft light
+
+Each light must:
+
+Have low intensity
+
+Cast soft shadows
+
+Be positioned to avoid specular stacking
+
+4️⃣ Shadows (Realism Without Darkness)
+
+Implement:
+
+Contact shadows or soft shadows
+
+Shadow bias tuning
+
+No pitch-black shadows
+
+Shadows must anchor the object, not overpower it
+
+5️⃣ Renderer & Exposure Locking
+
+You MUST:
+
+Lock exposure (no auto-exposure)
+
+Use ACES Filmic tone mapping
+
+Clamp highlights using realistic exposure
+
+Enable physicallyCorrectLights
+
+Prevent:
+
+Angle-based brightness variation
+
+Specular blowouts
+
+6️⃣ Material Safety Controls (Fabric-Specific)
+
+For cloth materials:
+
+Clamp roughness (never < 0.35)
+
+Metalness always ≈ 0
+
+Normal scale kept subtle
+
+Optional sheen with low intensity
+
+Ensure:
+
+Lighting does not amplify specular reflections unnaturally
+
+🧠 Deliverables Required
+
+Root Cause Explanation
+
+Why brightness changes with rotation
+
+Why white blowout occurs at angles
+
+Final Lighting Architecture
+
+Environment config
+
+Exact light positions
+
+Exact intensities
+
+Shadow settings
+
+Renderer Configuration
+
+Tone mapping
+
+Exposure
+
+Physically correct lighting
+
+Output encoding
+
+Ready-to-Paste Code
+
+<Canvas> configuration
+
+Lighting JSX
+
+<Environment /> config
+
+Shadow helpers (if needed)
+
+360° Validation Checklist
+
+How to confirm lighting is stable from all angles
+
+🎯 Reference Quality Standard
+
+Match lighting consistency seen in:
+
+Apple product pages
+
+Nike / Adidas 3D viewers
+
+Poly Haven studio previews
+
+Luxury fashion configurators
+
+⚠️ Constraints
+
+No user lighting controls
+
+Performance-friendly
+
+No dynamic exposure
+
+No postprocessing bloom
+
+Works for fabric, leather, and matte materials
+
+Output Rules
+
+Clear numeric values
+
+No vague advice
+
+Senior-level explanation
+
+Minimal but professional setup
+
+If done correctly:
+
+Rotating the model should feel like rotating it inside a soft studio light box, not under moving spotlights.
