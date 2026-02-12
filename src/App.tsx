@@ -6,7 +6,9 @@ import { parseFabrics, filterFabricsByColor, Fabric } from './utils/parseFabrics
 import Scene from './components/three/Scene';
 import PartSelector from './components/ui/PartSelector';
 import FabricGrid from './components/ui/FabricGrid';
-import LogoUploader from './components/ui/LogoUploader';
+import DecalEditor from './components/ui/DecalEditor';
+import TextEditorPanel from './components/ui/TextEditorPanel';
+import ImageEditorPanel from './components/ui/ImageEditorPanel';
 import { Camera, ChevronRight, Share2, ShoppingCart, Box, Download, Palette, Search } from 'lucide-react';
 import { exportSceneToImage } from './services/imageExport';
 
@@ -187,13 +189,14 @@ function App() {
                             </div>
                         </section>
 
-                        {/* Step 3: Identity & Graphics */}
                         <section>
                             <div className="flex items-center gap-2 mb-6">
                                 <span className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white shadow-lg shadow-blue-500/30">03</span>
                                 <h3 className="font-bold text-lg">Identity & Graphics</h3>
                             </div>
-                            <LogoUploader />
+                            <DecalEditor />
+                            <TextEditorPanel />
+                            <ImageEditorPanel />
                         </section>
                     </div>
                 </div>

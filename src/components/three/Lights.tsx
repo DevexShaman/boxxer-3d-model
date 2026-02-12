@@ -27,11 +27,11 @@ const Lights = () => {
                 intensity={0.4}
             />
 
-            {/* Top Soft Ambient: Vertical volume */}
-            <directionalLight
+            {/* Top Soft Ambient: Removed as per user feedback (too strong) */}
+            {/* <directionalLight
                 position={[0, 8, 0]}
-                intensity={0.2}
-            />
+                intensity={0.05}
+            /> */}
 
             <ambientLight intensity={0.15} />
         </>

@@ -1,9 +1,20 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { OrbitControls } from '@react-three/drei';
+import { useControlsRef } from '../../contexts/ControlsContext';
 
 const CameraControls = () => {
+    const orbitRef = useRef<any>(null);
+    const contextRef = useControlsRef();
+
+    useEffect(() => {
+        if (contextRef && orbitRef.current) {
+            (contextRef as any).current = orbitRef.current;
+        }
+    }, [contextRef]);
+
     return (
         <OrbitControls
+            ref={orbitRef}
             makeDefault
             minPolarAngle={0}
             maxPolarAngle={Math.PI / 1.75}
